@@ -2,17 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CyberFlappy - Neon Bird</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        :root {
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --dark-bg: #0a0a1a;
+        }
         
         body {
             font-family: 'Press Start 2P', cursive;
             overflow: hidden;
-            background-color: #0a0a1a;
+            background-color: var(--dark-bg);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-text-size-adjust: none;
+            text-size-adjust: none;
         }
         
         #gameCanvas {
@@ -20,18 +29,18 @@
             top: 0;
             left: 0;
             z-index: 1;
+            width: 100%;
+            height: 100%;
+            display: block;
         }
         
         .neon-text {
-            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff;
+            text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 15px var(--neon-blue);
         }
         
         .neon-border {
-            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, inset 0 0 10px #0ff;
-        }
-        
-        .pixelated {
-            image-rendering: pixelated;
+            box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), inset 0 0 10px var(--neon-blue);
+            border: 1px solid var(--neon-blue);
         }
         
         .scanlines {
@@ -56,20 +65,48 @@
         
         @keyframes glitch {
             0% {
-                text-shadow: 2px 0 #0ff, -2px 0 #f0f;
+                text-shadow: 2px 0 var(--neon-blue), -2px 0 var(--neon-pink);
             }
             25% {
-                text-shadow: -2px 0 #0ff, 2px 0 #f0f;
+                text-shadow: -2px 0 var(--neon-blue), 2px 0 var(--neon-pink);
             }
             50% {
-                text-shadow: 2px 0 #f0f, -2px 0 #0ff;
+                text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue);
             }
             75% {
-                text-shadow: -2px 0 #f0f, 2px 0 #0ff;
+                text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-blue);
             }
             100% {
-                text-shadow: 2px 0 #0ff, -2px 0 #f0f;
+                text-shadow: 2px 0 var(--neon-blue), -2px 0 var(--neon-pink);
             }
+        }
+        
+        /* Mobile-specific adjustments */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2.5rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            .game-instructions {
+                font-size: 1rem !important;
+                padding: 1rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            .game-button {
+                padding: 0.75rem 1.5rem !important;
+                font-size: 1rem !important;
+            }
+            #scoreDisplay {
+                font-size: 1.25rem !important;
+                top: 1rem !important;
+                left: 1rem !important;
+            }
+        }
+        
+        /* Prevent zoom on double-tap */
+        * {
+            -webkit-user-select: none;
+            user-select: none;
         }
     </style>
 </head>
@@ -77,12 +114,12 @@
     <div class="scanlines"></div>
     
     <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-80">
-        <h1 class="text-5xl md:text-7xl mb-8 neon-text glitch-effect">CYBER<span class="text-pink-500">FLAPPY</span></h1>
-        <div class="neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
-            <p class="text-xl mb-4">Use SPACE or CLICK to fly</p>
+        <h1 class="game-title text-5xl md:text-7xl mb-8 neon-text glitch-effect">CYBER<span class="text-pink-500">FLAPPY</span></h1>
+        <div class="game-instructions neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
+            <p class="text-xl mb-4">Use SPACE or TAP to fly</p>
             <p class="text-sm text-gray-400">Avoid the neon pipes</p>
         </div>
-        <button id="startButton" class="px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
+        <button id="startButton" class="game-button px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
             START GAME
         </button>
         <div class="mt-8 text-xs text-gray-500">
@@ -91,12 +128,12 @@
     </div>
     
     <div id="gameOverScreen" class="absolute inset-0 hidden flex-col items-center justify-center z-10 bg-black bg-opacity-80">
-        <h1 class="text-5xl md:text-7xl mb-8 neon-text text-red-500">GAME OVER</h1>
-        <div class="neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
+        <h1 class="game-title text-5xl md:text-7xl mb-8 neon-text text-red-500">GAME OVER</h1>
+        <div class="game-instructions neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
             <p class="text-xl mb-2">Score: <span id="finalScore" class="text-green-400">0</span></p>
             <p class="text-sm">High Score: <span id="finalHighScore" class="text-yellow-400">0</span></p>
         </div>
-        <button id="restartButton" class="px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
+        <button id="restartButton" class="game-button px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
             TRY AGAIN
         </button>
     </div>
@@ -105,13 +142,14 @@
         Score: <span id="currentScore">0</span>
     </div>
     
-    <canvas id="gameCanvas" class="w-full h-full"></canvas>
+    <canvas id="gameCanvas"></canvas>
     
     <script>
+        // Use modern JavaScript features with fallbacks
         document.addEventListener('DOMContentLoaded', () => {
             // Game elements
             const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { alpha: false });
             const startScreen = document.getElementById('startScreen');
             const gameOverScreen = document.getElementById('gameOverScreen');
             const scoreDisplay = document.getElementById('scoreDisplay');
@@ -122,39 +160,56 @@
             const startButton = document.getElementById('startButton');
             const restartButton = document.getElementById('restartButton');
             
-            // Set canvas size
+            // Set canvas size with device pixel ratio support
             function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
             }
+            
+            // Initial resize and on window resize
             resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                if (gameRunning) {
+                    drawBackground();
+                    drawPipes();
+                    drawBird();
+                }
+            });
             
             // Game variables
             let score = 0;
             let highScore = localStorage.getItem('cyberFlappyHighScore') || 0;
             let gameRunning = false;
             let animationFrameId;
+            let lastPipeTime = 0;
+            let pipeInterval = 2000; // ms between pipes
             
             // Update high score display
             highScoreDisplay.textContent = highScore;
             
-            // Bird properties
+            // Bird properties (scaled based on screen size)
+            const getBirdSize = () => Math.max(30, Math.min(40, canvas.width / 10));
             const bird = {
                 x: 100,
                 y: canvas.height / 2,
-                width: 40,
-                height: 30,
+                get width() { return getBirdSize(); },
+                get height() { return getBirdSize() * 0.75; },
                 velocity: 0,
                 gravity: 0.5,
                 jumpForce: -10,
                 color: '#0ff'
             };
             
-            // Pipes properties
+            // Pipes properties (scaled based on screen size)
+            const getPipeWidth = () => Math.max(60, Math.min(80, canvas.width / 8));
+            const getPipeGap = () => Math.max(180, Math.min(220, canvas.height / 3));
             const pipes = {
-                width: 80,
-                gap: 200,
+                get width() { return getPipeWidth(); },
+                get gap() { return getPipeGap(); },
                 speed: 3,
                 list: [],
                 color: '#f0f'
@@ -170,7 +225,7 @@
             // Create initial background buildings
             function createBuildings() {
                 background.buildings = [];
-                const buildingCount = 10;
+                const buildingCount = Math.max(5, Math.floor(canvas.width / 150));
                 for (let i = 0; i < buildingCount; i++) {
                     background.buildings.push({
                         x: i * (canvas.width / buildingCount),
@@ -184,7 +239,7 @@
             // Create stars
             function createStars() {
                 background.stars = [];
-                const starCount = 100;
+                const starCount = Math.max(50, Math.floor(canvas.width * canvas.height / 5000));
                 for (let i = 0; i < starCount; i++) {
                     background.stars.push({
                         x: Math.random() * canvas.width,
@@ -197,11 +252,12 @@
             
             // Draw neon glow effect
             function drawNeonGlow(x, y, width, height, color, blur = 20) {
+                ctx.save();
                 ctx.shadowColor = color;
                 ctx.shadowBlur = blur;
                 ctx.fillStyle = color;
                 ctx.fillRect(x, y, width, height);
-                ctx.shadowBlur = 0;
+                ctx.restore();
             }
             
             // Draw bird
@@ -309,10 +365,24 @@
                 if (gameRunning) {
                     bird.velocity = bird.jumpForce;
                     
-                    // Play jump sound
-                    const jumpSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
-                    jumpSound.volume = 0.2;
-                    jumpSound.play().catch(e => console.log('Audio play failed:', e));
+                    // Play jump sound (using Web Audio API for better mobile support)
+                    try {
+                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioCtx.createOscillator();
+                        const gainNode = audioCtx.createGain();
+                        
+                        oscillator.type = 'sine';
+                        oscillator.frequency.value = 800;
+                        gainNode.gain.value = 0.1;
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        
+                        oscillator.start();
+                        oscillator.stop(audioCtx.currentTime + 0.1);
+                    } catch (e) {
+                        console.log('Audio error:', e);
+                    }
                 }
             }
             
@@ -333,9 +403,16 @@
             
             // Update pipes
             function updatePipes() {
-                // Generate new pipes
-                if (pipes.list.length === 0 || pipes.list[pipes.list.length - 1].x < canvas.width - 300) {
+                const now = Date.now();
+                
+                // Generate new pipes based on time interval
+                if (pipes.list.length === 0 || (now - lastPipeTime > pipeInterval && pipes.list[pipes.list.length - 1].x < canvas.width - 200)) {
                     generatePipes();
+                    lastPipeTime = now;
+                    
+                    // Increase difficulty slightly
+                    pipeInterval = Math.max(1000, pipeInterval - 10);
+                    pipes.speed = Math.min(6, pipes.speed + 0.01);
                 }
                 
                 // Move pipes and check for collisions
@@ -358,9 +435,23 @@
                         currentScoreDisplay.textContent = score;
                         
                         // Play score sound
-                        const scoreSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
-                        scoreSound.volume = 0.1;
-                        scoreSound.play().catch(e => console.log('Audio play failed:', e));
+                        try {
+                            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                            const oscillator = audioCtx.createOscillator();
+                            const gainNode = audioCtx.createGain();
+                            
+                            oscillator.type = 'square';
+                            oscillator.frequency.value = 1200;
+                            gainNode.gain.value = 0.1;
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(audioCtx.destination);
+                            
+                            oscillator.start();
+                            oscillator.stop(audioCtx.currentTime + 0.05);
+                        } catch (e) {
+                            console.log('Audio error:', e);
+                        }
                     }
                     
                     // Remove pipes that are off screen
@@ -394,13 +485,30 @@
             
             // Game over
             function gameOver() {
+                if (!gameRunning) return;
+                
                 gameRunning = false;
                 cancelAnimationFrame(animationFrameId);
                 
                 // Play game over sound
-                const gameOverSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
-                gameOverSound.volume = 0.3;
-                gameOverSound.play().catch(e => console.log('Audio play failed:', e));
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                    gainNode.gain.value = 0.1;
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.5);
+                } catch (e) {
+                    console.log('Audio error:', e);
+                }
                 
                 // Update high score
                 if (score > highScore) {
@@ -415,8 +523,10 @@
                 scoreDisplay.classList.add('hidden');
             }
             
-            // Game loop
-            function gameLoop() {
+            // Game loop optimized for mobile
+            function gameLoop(timestamp) {
+                if (!gameRunning) return;
+                
                 drawBackground();
                 updateBird();
                 updatePipes();
@@ -424,9 +534,7 @@
                 drawPipes();
                 drawBird();
                 
-                if (gameRunning) {
-                    animationFrameId = requestAnimationFrame(gameLoop);
-                }
+                animationFrameId = requestAnimationFrame(gameLoop);
             }
             
             // Start game
@@ -437,6 +545,9 @@
                 bird.y = canvas.height / 2;
                 bird.velocity = 0;
                 pipes.list = [];
+                lastPipeTime = Date.now();
+                pipeInterval = 2000;
+                pipes.speed = 3;
                 
                 // Create background
                 createBuildings();
@@ -449,26 +560,51 @@
                 
                 // Start game
                 gameRunning = true;
-                gameLoop();
+                animationFrameId = requestAnimationFrame(gameLoop);
             }
             
-            // Event listeners
-            startButton.addEventListener('click', startGame);
-            restartButton.addEventListener('click', startGame);
+            // Event listeners with passive options for better mobile performance
+            startButton.addEventListener('click', startGame, { passive: true });
+            restartButton.addEventListener('click', startGame, { passive: true });
             
+            // Keyboard controls
             document.addEventListener('keydown', (e) => {
                 if (e.code === 'Space') {
                     e.preventDefault();
                     jump();
                 }
-            });
+            }, { passive: false });
             
-            canvas.addEventListener('click', jump);
+            // Touch controls
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                jump();
+            }, { passive: false });
+            
+            // Mouse controls
+            canvas.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                jump();
+            }, { passive: false });
             
             // Initial setup
             drawBackground();
             createBuildings();
             createStars();
+            
+            // Handle mobile browser address bar showing/hiding
+            window.addEventListener('resize', () => {
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
+            });
+            
+            // Prevent pull-to-refresh on mobile
+            document.body.addEventListener('touchmove', (e) => {
+                if (gameRunning) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
         });
     </script>
 </body>
