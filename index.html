@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberFlappy - Neon Bird</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        
+        body {
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+            background-color: #0a0a1a;
+        }
+        
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 15px #0ff;
+        }
+        
+        .neon-border {
+            box-shadow: 0 0 10px #0ff, 0 0 20px #0ff, inset 0 0 10px #0ff;
+        }
+        
+        .pixelated {
+            image-rendering: pixelated;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 95%,
+                rgba(0, 255, 255, 0.1) 96%
+            );
+            background-size: 100% 4px;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .glitch-effect {
+            animation: glitch 1s linear infinite;
+        }
+        
+        @keyframes glitch {
+            0% {
+                text-shadow: 2px 0 #0ff, -2px 0 #f0f;
+            }
+            25% {
+                text-shadow: -2px 0 #0ff, 2px 0 #f0f;
+            }
+            50% {
+                text-shadow: 2px 0 #f0f, -2px 0 #0ff;
+            }
+            75% {
+                text-shadow: -2px 0 #f0f, 2px 0 #0ff;
+            }
+            100% {
+                text-shadow: 2px 0 #0ff, -2px 0 #f0f;
+            }
+        }
+    </style>
+</head>
+<body class="bg-black text-white relative h-screen w-screen">
+    <div class="scanlines"></div>
+    
+    <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-80">
+        <h1 class="text-5xl md:text-7xl mb-8 neon-text glitch-effect">CYBER<span class="text-pink-500">FLAPPY</span></h1>
+        <div class="neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
+            <p class="text-xl mb-4">Use SPACE or CLICK to fly</p>
+            <p class="text-sm text-gray-400">Avoid the neon pipes</p>
+        </div>
+        <button id="startButton" class="px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
+            START GAME
+        </button>
+        <div class="mt-8 text-xs text-gray-500">
+            <p>High Score: <span id="highScoreDisplay">0</span></p>
+        </div>
+    </div>
+    
+    <div id="gameOverScreen" class="absolute inset-0 hidden flex-col items-center justify-center z-10 bg-black bg-opacity-80">
+        <h1 class="text-5xl md:text-7xl mb-8 neon-text text-red-500">GAME OVER</h1>
+        <div class="neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
+            <p class="text-xl mb-2">Score: <span id="finalScore" class="text-green-400">0</span></p>
+            <p class="text-sm">High Score: <span id="finalHighScore" class="text-yellow-400">0</span></p>
+        </div>
+        <button id="restartButton" class="px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
+            TRY AGAIN
+        </button>
+    </div>
+    
+    <div id="scoreDisplay" class="absolute top-4 left-4 text-2xl neon-text hidden z-10">
+        Score: <span id="currentScore">0</span>
+    </div>
+    
+    <canvas id="gameCanvas" class="w-full h-full"></canvas>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game elements
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const startScreen = document.getElementById('startScreen');
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const currentScoreDisplay = document.getElementById('currentScore');
+            const finalScoreDisplay = document.getElementById('finalScore');
+            const highScoreDisplay = document.getElementById('highScoreDisplay');
+            const finalHighScoreDisplay = document.getElementById('finalHighScore');
+            const startButton = document.getElementById('startButton');
+            const restartButton = document.getElementById('restartButton');
+            
+            // Set canvas size
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Game variables
+            let score = 0;
+            let highScore = localStorage.getItem('cyberFlappyHighScore') || 0;
+            let gameRunning = false;
+            let animationFrameId;
+            
+            // Update high score display
+            highScoreDisplay.textContent = highScore;
+            
+            // Bird properties
+            const bird = {
+                x: 100,
+                y: canvas.height / 2,
+                width: 40,
+                height: 30,
+                velocity: 0,
+                gravity: 0.5,
+                jumpForce: -10,
+                color: '#0ff'
+            };
+            
+            // Pipes properties
+            const pipes = {
+                width: 80,
+                gap: 200,
+                speed: 3,
+                list: [],
+                color: '#f0f'
+            };
+            
+            // Background elements
+            const background = {
+                buildings: [],
+                stars: [],
+                color: '#0a0a1a'
+            };
+            
+            // Create initial background buildings
+            function createBuildings() {
+                background.buildings = [];
+                const buildingCount = 10;
+                for (let i = 0; i < buildingCount; i++) {
+                    background.buildings.push({
+                        x: i * (canvas.width / buildingCount),
+                        width: canvas.width / buildingCount,
+                        height: Math.random() * 200 + 100,
+                        color: `hsl(${Math.random() * 60 + 240}, 80%, 30%)`
+                    });
+                }
+            }
+            
+            // Create stars
+            function createStars() {
+                background.stars = [];
+                const starCount = 100;
+                for (let i = 0; i < starCount; i++) {
+                    background.stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        size: Math.random() * 2 + 1,
+                        twinkle: Math.random() * 5
+                    });
+                }
+            }
+            
+            // Draw neon glow effect
+            function drawNeonGlow(x, y, width, height, color, blur = 20) {
+                ctx.shadowColor = color;
+                ctx.shadowBlur = blur;
+                ctx.fillStyle = color;
+                ctx.fillRect(x, y, width, height);
+                ctx.shadowBlur = 0;
+            }
+            
+            // Draw bird
+            function drawBird() {
+                // Neon glow
+                drawNeonGlow(bird.x - 5, bird.y - 5, bird.width + 10, bird.height + 10, bird.color);
+                
+                // Bird body
+                ctx.fillStyle = '#000';
+                ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+                
+                // Bird eye
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(bird.x + bird.width - 15, bird.y + 5, 10, 10);
+                
+                // Bird beak
+                ctx.fillStyle = '#ff0';
+                ctx.beginPath();
+                ctx.moveTo(bird.x + bird.width, bird.y + bird.height / 2);
+                ctx.lineTo(bird.x + bird.width + 15, bird.y + bird.height / 2);
+                ctx.lineTo(bird.x + bird.width, bird.y + bird.height / 2 + 10);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Draw pipes
+            function drawPipes() {
+                pipes.list.forEach(pipe => {
+                    // Top pipe
+                    drawNeonGlow(pipe.x - 5, 0, pipes.width + 10, pipe.topHeight + 10, pipes.color);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(pipe.x, 0, pipes.width, pipe.topHeight);
+                    
+                    // Bottom pipe
+                    drawNeonGlow(pipe.x - 5, pipe.bottomY - 5, pipes.width + 10, pipe.bottomHeight + 10, pipes.color);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(pipe.x, pipe.bottomY, pipes.width, pipe.bottomHeight);
+                    
+                    // Pipe decorations
+                    ctx.fillStyle = '#0ff';
+                    // Top pipe decoration
+                    ctx.fillRect(pipe.x, pipe.topHeight - 20, pipes.width, 5);
+                    // Bottom pipe decoration
+                    ctx.fillRect(pipe.x, pipe.bottomY, pipes.width, 5);
+                });
+            }
+            
+            // Draw background
+            function drawBackground() {
+                // Clear canvas
+                ctx.fillStyle = background.color;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw stars
+                ctx.fillStyle = '#fff';
+                background.stars.forEach(star => {
+                    const brightness = 0.7 + Math.sin(Date.now() / 1000 + star.twinkle) * 0.3;
+                    ctx.globalAlpha = brightness;
+                    ctx.fillRect(star.x, star.y, star.size, star.size);
+                });
+                ctx.globalAlpha = 1;
+                
+                // Draw buildings
+                background.buildings.forEach(building => {
+                    // Building glow
+                    drawNeonGlow(building.x - 5, canvas.height - building.height - 5, building.width + 10, building.height + 10, building.color, 15);
+                    
+                    // Building body
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(building.x, canvas.height - building.height, building.width, building.height);
+                    
+                    // Building windows
+                    ctx.fillStyle = '#0ff';
+                    const windowRows = Math.floor(building.height / 30);
+                    const windowCols = Math.floor(building.width / 20);
+                    const windowPadding = 5;
+                    
+                    for (let row = 0; row < windowRows; row++) {
+                        for (let col = 0; col < windowCols; col++) {
+                            if (Math.random() > 0.3) { // Randomly turn some windows on/off
+                                ctx.fillRect(
+                                    building.x + col * 20 + windowPadding,
+                                    canvas.height - building.height + row * 30 + windowPadding,
+                                    10, 10
+                                );
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Update bird position
+            function updateBird() {
+                bird.velocity += bird.gravity;
+                bird.y += bird.velocity;
+                
+                // Check if bird hits the ground or ceiling
+                if (bird.y + bird.height > canvas.height || bird.y < 0) {
+                    gameOver();
+                }
+            }
+            
+            // Make bird jump
+            function jump() {
+                if (gameRunning) {
+                    bird.velocity = bird.jumpForce;
+                    
+                    // Play jump sound
+                    const jumpSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
+                    jumpSound.volume = 0.2;
+                    jumpSound.play().catch(e => console.log('Audio play failed:', e));
+                }
+            }
+            
+            // Generate new pipes
+            function generatePipes() {
+                const minHeight = 50;
+                const maxHeight = canvas.height - pipes.gap - minHeight;
+                const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+                
+                pipes.list.push({
+                    x: canvas.width,
+                    topHeight: topHeight,
+                    bottomY: topHeight + pipes.gap,
+                    bottomHeight: canvas.height - (topHeight + pipes.gap),
+                    passed: false
+                });
+            }
+            
+            // Update pipes
+            function updatePipes() {
+                // Generate new pipes
+                if (pipes.list.length === 0 || pipes.list[pipes.list.length - 1].x < canvas.width - 300) {
+                    generatePipes();
+                }
+                
+                // Move pipes and check for collisions
+                for (let i = pipes.list.length - 1; i >= 0; i--) {
+                    pipes.list[i].x -= pipes.speed;
+                    
+                    // Check for collision with bird
+                    if (
+                        bird.x + bird.width > pipes.list[i].x &&
+                        bird.x < pipes.list[i].x + pipes.width &&
+                        (bird.y < pipes.list[i].topHeight || bird.y + bird.height > pipes.list[i].bottomY)
+                    ) {
+                        gameOver();
+                    }
+                    
+                    // Check if bird passed the pipe
+                    if (!pipes.list[i].passed && bird.x > pipes.list[i].x + pipes.width) {
+                        pipes.list[i].passed = true;
+                        score++;
+                        currentScoreDisplay.textContent = score;
+                        
+                        // Play score sound
+                        const scoreSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
+                        scoreSound.volume = 0.1;
+                        scoreSound.play().catch(e => console.log('Audio play failed:', e));
+                    }
+                    
+                    // Remove pipes that are off screen
+                    if (pipes.list[i].x + pipes.width < 0) {
+                        pipes.list.splice(i, 1);
+                    }
+                }
+            }
+            
+            // Update background
+            function updateBackground() {
+                // Move buildings
+                background.buildings.forEach(building => {
+                    building.x -= pipes.speed / 2;
+                    if (building.x + building.width < 0) {
+                        building.x = canvas.width;
+                        building.height = Math.random() * 200 + 100;
+                        building.color = `hsl(${Math.random() * 60 + 240}, 80%, 30%)`;
+                    }
+                });
+                
+                // Twinkle stars
+                background.stars.forEach(star => {
+                    star.x -= pipes.speed / 10;
+                    if (star.x < 0) {
+                        star.x = canvas.width;
+                        star.y = Math.random() * canvas.height;
+                    }
+                });
+            }
+            
+            // Game over
+            function gameOver() {
+                gameRunning = false;
+                cancelAnimationFrame(animationFrameId);
+                
+                // Play game over sound
+                const gameOverSound = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...');
+                gameOverSound.volume = 0.3;
+                gameOverSound.play().catch(e => console.log('Audio play failed:', e));
+                
+                // Update high score
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('cyberFlappyHighScore', highScore);
+                }
+                
+                // Show game over screen
+                finalScoreDisplay.textContent = score;
+                finalHighScoreDisplay.textContent = highScore;
+                gameOverScreen.classList.remove('hidden');
+                scoreDisplay.classList.add('hidden');
+            }
+            
+            // Game loop
+            function gameLoop() {
+                drawBackground();
+                updateBird();
+                updatePipes();
+                updateBackground();
+                drawPipes();
+                drawBird();
+                
+                if (gameRunning) {
+                    animationFrameId = requestAnimationFrame(gameLoop);
+                }
+            }
+            
+            // Start game
+            function startGame() {
+                // Reset game state
+                score = 0;
+                currentScoreDisplay.textContent = score;
+                bird.y = canvas.height / 2;
+                bird.velocity = 0;
+                pipes.list = [];
+                
+                // Create background
+                createBuildings();
+                createStars();
+                
+                // Show game elements
+                startScreen.classList.add('hidden');
+                gameOverScreen.classList.add('hidden');
+                scoreDisplay.classList.remove('hidden');
+                
+                // Start game
+                gameRunning = true;
+                gameLoop();
+            }
+            
+            // Event listeners
+            startButton.addEventListener('click', startGame);
+            restartButton.addEventListener('click', startGame);
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    jump();
+                }
+            });
+            
+            canvas.addEventListener('click', jump);
+            
+            // Initial setup
+            drawBackground();
+            createBuildings();
+            createStars();
+        });
+    </script>
+</body>
+</html>
