@@ -2,610 +2,913 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CyberFlappy - Neon Bird</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Sanjesh's personal website</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         
         :root {
-            --neon-blue: #0ff;
-            --neon-pink: #f0f;
-            --dark-bg: #0a0a1a;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
         }
         
         body {
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
-            background-color: var(--dark-bg);
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-text-size-adjust: none;
-            text-size-adjust: none;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            overflow-x: hidden;
         }
         
-        #gameCanvas {
+        .gradient-text {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+        }
+        
+        .skill-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            overflow: hidden;
+        }
+        
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 1.5s ease;
+        }
+        
+        .project-card::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
-            z-index: 1;
             width: 100%;
             height: 100%;
-            display: block;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8) 0%, rgba(16, 185, 129, 0.8) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .neon-text {
-            text-shadow: 0 0 5px var(--neon-blue), 0 0 10px var(--neon-blue), 0 0 15px var(--neon-blue);
+        .project-card:hover::before {
+            opacity: 1;
         }
         
-        .neon-border {
-            box-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), inset 0 0 10px var(--neon-blue);
-            border: 1px solid var(--neon-blue);
-        }
-        
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 95%,
-                rgba(0, 255, 255, 0.1) 96%
-            );
-            background-size: 100% 4px;
+        .project-content {
             z-index: 2;
-            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .glitch-effect {
-            animation: glitch 1s linear infinite;
+        .project-card:hover .project-content {
+            opacity: 1;
         }
         
-        @keyframes glitch {
-            0% {
-                text-shadow: 2px 0 var(--neon-blue), -2px 0 var(--neon-pink);
-            }
-            25% {
-                text-shadow: -2px 0 var(--neon-blue), 2px 0 var(--neon-pink);
-            }
-            50% {
-                text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-blue);
-            }
-            75% {
-                text-shadow: -2px 0 var(--neon-pink), 2px 0 var(--neon-blue);
-            }
-            100% {
-                text-shadow: 2px 0 var(--neon-blue), -2px 0 var(--neon-pink);
-            }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
         }
         
-        /* Mobile-specific adjustments */
-        @media (max-width: 768px) {
-            .game-title {
-                font-size: 2.5rem !important;
-                margin-bottom: 1.5rem !important;
-            }
-            .game-instructions {
-                font-size: 1rem !important;
-                padding: 1rem !important;
-                margin-bottom: 1.5rem !important;
-            }
-            .game-button {
-                padding: 0.75rem 1.5rem !important;
-                font-size: 1rem !important;
-            }
-            #scoreDisplay {
-                font-size: 1.25rem !important;
-                top: 1rem !important;
-                left: 1rem !important;
-            }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
         
-        /* Prevent zoom on double-tap */
-        * {
-            -webkit-user-select: none;
-            user-select: none;
+        .blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            filter: blur(50px);
+            opacity: 0.2;
+            z-index: -1;
+            animation: blob-animate 20s linear infinite;
+        }
+        
+        @keyframes blob-animate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .blob-1 {
+            top: -200px;
+            right: -200px;
+        }
+        
+        .blob-2 {
+            bottom: -200px;
+            left: -200px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            left: -10px;
+            top: 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background-color: #e2e8f0;
+            left: 0;
+            top: 0;
         }
     </style>
 </head>
-<body class="bg-black text-white relative h-screen w-screen">
-    <div class="scanlines"></div>
+<body class="antialiased">
+    <!-- Blob Background Elements -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
     
-    <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-80">
-        <h1 class="game-title text-5xl md:text-7xl mb-8 neon-text glitch-effect">CYBER<span class="text-pink-500">FLAPPY</span></h1>
-        <div class="game-instructions neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
-            <p class="text-xl mb-4">Use SPACE or TAP to fly</p>
-            <p class="text-sm text-gray-400">Avoid the neon pipes</p>
+    <!-- Navigation -->
+    <nav class="fixed w-full bg-white bg-opacity-80 backdrop-blur-sm z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold gradient-text">Portfolio</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-center space-x-8">
+                        <a href="#home" class="nav-link text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">Home</a>
+                        <a href="#about" class="nav-link text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">About</a>
+                        <a href="#skills" class="nav-link text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">Skills</a>
+                        <a href="#projects" class="nav-link text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">Projects</a>
+                        <a href="#experience" class="nav-link text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">Experience</a>
+                        <a href="#contact" class="nav-link text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium">Contact</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-500 hover:text-gray-900 focus:outline-none">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-        <button id="startButton" class="game-button px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
-            START GAME
-        </button>
-        <div class="mt-8 text-xs text-gray-500">
-            <p>High Score: <span id="highScoreDisplay">0</span></p>
+        
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-lg">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Home</a>
+                <a href="#about" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">About</a>
+                <a href="#skills" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Skills</a>
+                <a href="#projects" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Projects</a>
+                <a href="#experience" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Experience</a>
+                <a href="#contact" class="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Contact</a>
+            </div>
         </div>
-    </div>
+    </nav>
     
-    <div id="gameOverScreen" class="absolute inset-0 hidden flex-col items-center justify-center z-10 bg-black bg-opacity-80">
-        <h1 class="game-title text-5xl md:text-7xl mb-8 neon-text text-red-500">GAME OVER</h1>
-        <div class="game-instructions neon-border p-6 rounded-lg mb-8 bg-gray-900 bg-opacity-70">
-            <p class="text-xl mb-2">Score: <span id="finalScore" class="text-green-400">0</span></p>
-            <p class="text-sm">High Score: <span id="finalHighScore" class="text-yellow-400">0</span></p>
+    <!-- Hero Section -->
+    <section id="home" class="hero-section min-h-screen flex items-center pt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="text-center md:text-left">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                        Hi, I'm <span class="gradient-text">Alex</span>
+                    </h1>
+                    <h2 class="text-2xl md:text-3xl font-semibold text-gray-600 mb-8">
+                        Full Stack Developer & UI/UX Designer
+                    </h2>
+                    <p class="text-gray-600 mb-8 max-w-lg">
+                        I create beautiful, functional digital experiences that solve problems and delight users. Let's build something amazing together!
+                    </p>
+                    <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                        <a href="#contact" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                            Contact Me
+                        </a>
+                        <a href="#projects" class="px-8 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-full hover:border-blue-500 hover:text-blue-500 transition-all duration-300">
+                            View Work
+                        </a>
+                    </div>
+                </div>
+                <div class="relative flex justify-center">
+                    <div class="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white shadow-2xl floating">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=774&q=80" 
+                             alt="Profile" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
         </div>
-        <button id="restartButton" class="game-button px-8 py-4 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded-lg neon-border transition-all hover:scale-105">
-            TRY AGAIN
-        </button>
-    </div>
+    </section>
     
-    <div id="scoreDisplay" class="absolute top-4 left-4 text-2xl neon-text hidden z-10">
-        Score: <span id="currentScore">0</span>
-    </div>
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">About <span class="gradient-text">Me</span></h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="relative">
+                    <div class="w-full h-80 md:h-96 bg-gray-100 rounded-2xl overflow-hidden shadow-lg">
+                        <img src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="About" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-lg shadow-lg hidden md:block">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-blue-100 rounded-full mr-3">
+                                <i class="fas fa-trophy text-blue-500 text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">5+ Years</h4>
+                                <p class="text-sm text-gray-500">Experience</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">Who am I?</h3>
+                    <p class="text-gray-600 mb-6">
+                        I'm a passionate full-stack developer with expertise in creating modern web applications. With a strong foundation in computer science and years of hands-on experience, I specialize in building responsive, user-friendly websites and applications.
+                    </p>
+                    <p class="text-gray-600 mb-8">
+                        My approach combines technical excellence with creative design thinking. I believe that great digital products are not just about code, but about solving real problems in elegant ways that users love.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
+                            <span class="text-gray-700">Web Development</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
+                            <span class="text-gray-700">UI/UX Design</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
+                            <span class="text-gray-700">Mobile Apps</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
+                            <span class="text-gray-700">SEO Optimization</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#" class="px-6 py-2 bg-blue-500 text-white rounded-full flex items-center">
+                            <i class="fab fa-github mr-2"></i> GitHub
+                        </a>
+                        <a href="#" class="px-6 py-2 bg-blue-700 text-white rounded-full flex items-center">
+                            <i class="fab fa-linkedin-in mr-2"></i> LinkedIn
+                        </a>
+                        <a href="#" class="px-6 py-2 bg-pink-600 text-white rounded-full flex items-center">
+                            <i class="fab fa-dribbble mr-2"></i> Dribbble
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     
-    <canvas id="gameCanvas"></canvas>
+    <!-- Skills Section -->
+    <section id="skills" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">My <span class="gradient-text">Skills</span></h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">Technical Skills</h3>
+                    <p class="text-gray-600 mb-8">
+                        I've worked with a wide range of technologies in the web development world. Here are some of my core technical skills:
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium">HTML/CSS</span>
+                                <span class="font-medium">95%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium">JavaScript</span>
+                                <span class="font-medium">90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium">React</span>
+                                <span class="font-medium">85%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium">Node.js</span>
+                                <span class="font-medium">80%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">Professional Skills</h3>
+                    <p class="text-gray-600 mb-8">
+                        Beyond technical expertise, I bring a range of professional skills that help me deliver exceptional results:
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-lightbulb text-blue-500 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Creative Design</h4>
+                            <p class="text-gray-600 text-sm">Innovative solutions with user-centered design principles.</p>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-users text-emerald-500 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Teamwork</h4>
+                            <p class="text-gray-600 text-sm">Collaborative approach to achieve common goals.</p>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-project-diagram text-purple-500 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Project Management</h4>
+                            <p class="text-gray-600 text-sm">Effective planning and execution of projects.</p>
+                        </div>
+                        
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fas fa-comments text-amber-500 text-xl"></i>
+                            </div>
+                            <h4 class="font-bold mb-2">Communication</h4>
+                            <p class="text-gray-600 text-sm">Clear and concise technical communication.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold mb-8 text-center">Tools & Technologies</h3>
+                <div class="flex flex-wrap justify-center gap-8">
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-html5 text-orange-500 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">HTML5</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-css3-alt text-blue-500 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">CSS3</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-js text-yellow-500 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">JavaScript</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-react text-blue-400 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">React</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-node-js text-green-500 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">Node.js</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-git-alt text-orange-600 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">Git</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fas fa-database text-blue-600 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">MongoDB</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 bg-white rounded-full shadow-md flex items-center justify-center mb-2">
+                            <i class="fab fa-figma text-purple-500 text-3xl"></i>
+                        </div>
+                        <span class="text-sm font-medium">Figma</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">My <span class="gradient-text">Projects</span></h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Project 1 -->
+                <div class="project-card bg-gray-100 rounded-xl overflow-hidden shadow-lg relative">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Project 1" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="project-content absolute inset-0 flex flex-col justify-end p-6">
+                        <h3 class="text-white text-xl font-bold mb-2">E-commerce Platform</h3>
+                        <p class="text-white text-sm mb-4">A full-featured online store with payment integration and inventory management.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">React</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Node.js</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 2 -->
+                <div class="project-card bg-gray-100 rounded-xl overflow-hidden shadow-lg relative">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" 
+                             alt="Project 2" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="project-content absolute inset-0 flex flex-col justify-end p-6">
+                        <h3 class="text-white text-xl font-bold mb-2">Task Management App</h3>
+                        <p class="text-white text-sm mb-4">A productivity application for teams to collaborate on projects and tasks.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Vue.js</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Firebase</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Tailwind</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 3 -->
+                <div class="project-card bg-gray-100 rounded-xl overflow-hidden shadow-lg relative">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Project 3" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="project-content absolute inset-0 flex flex-col justify-end p-6">
+                        <h3 class="text-white text-xl font-bold mb-2">Health & Fitness Tracker</h3>
+                        <p class="text-white text-sm mb-4">An application to track workouts, nutrition, and health metrics.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">React Native</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">GraphQL</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">AWS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 4 -->
+                <div class="project-card bg-gray-100 rounded-xl overflow-hidden shadow-lg relative">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1522542550221-31fd19575a2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Project 4" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="project-content absolute inset-0 flex flex-col justify-end p-6">
+                        <h3 class="text-white text-xl font-bold mb-2">Real Estate Portal</h3>
+                        <p class="text-white text-sm mb-4">A platform for browsing and listing properties with advanced search filters.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Next.js</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">PostgreSQL</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Mapbox</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 5 -->
+                <div class="project-card bg-gray-100 rounded-xl overflow-hidden shadow-lg relative">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1476&q=80" 
+                             alt="Project 5" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="project-content absolute inset-0 flex flex-col justify-end p-6">
+                        <h3 class="text-white text-xl font-bold mb-2">Recipe Sharing Platform</h3>
+                        <p class="text-white text-sm mb-4">A community-driven platform for sharing and discovering new recipes.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">Angular</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">NestJS</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">MySQL</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 6 -->
+                <div class="project-card bg-gray-100 rounded-xl overflow-hidden shadow-lg relative">
+                    <div class="h-48 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Project 6" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+                    </div>
+                    <div class="project-content absolute inset-0 flex flex-col justify-end p-6">
+                        <h3 class="text-white text-xl font-bold mb-2">Portfolio Template</h3>
+                        <p class="text-white text-sm mb-4">A customizable portfolio template for creatives and developers.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">HTML/CSS</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">JavaScript</span>
+                            <span class="bg-white bg-opacity-20 text-white text-xs px-3 py-1 rounded-full">GSAP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-full hover:bg-gray-50 transition-all duration-300">
+                    View All Projects
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Experience Section -->
+    <section id="experience" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Work <span class="gradient-text">Experience</span></h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 mx-auto"></div>
+            </div>
+            
+            <div class="relative pl-8">
+                <div class="timeline relative">
+                    <!-- Experience 1 -->
+                    <div class="timeline-item relative pb-8 pl-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                                <h3 class="text-xl font-bold">Senior Frontend Developer</h3>
+                                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">2021 - Present</span>
+                            </div>
+                            <h4 class="text-blue-500 font-medium mb-3">TechSolutions Inc.</h4>
+                            <p class="text-gray-600 mb-4">
+                                Lead the frontend development team in building complex web applications using React and TypeScript. Implemented design systems and improved performance by 40%.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">React</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">TypeScript</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">Redux</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Experience 2 -->
+                    <div class="timeline-item relative pb-8 pl-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                                <h3 class="text-xl font-bold">Full Stack Developer</h3>
+                                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">2018 - 2021</span>
+                            </div>
+                            <h4 class="text-blue-500 font-medium mb-3">Digital Innovations LLC</h4>
+                            <p class="text-gray-600 mb-4">
+                                Developed and maintained multiple web applications using MERN stack. Collaborated with designers to implement responsive UIs and optimized backend APIs.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">Node.js</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">MongoDB</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">Express</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Experience 3 -->
+                    <div class="timeline-item relative pb-8 pl-8">
+                        <div class="bg-white p-6 rounded-xl shadow-md card-hover">
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                                <h3 class="text-xl font-bold">Junior Web Developer</h3>
+                                <span class="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">2016 - 2018</span>
+                            </div>
+                            <h4 class="text-blue-500 font-medium mb-3">WebCraft Studios</h4>
+                            <p class="text-gray-600 mb-4">
+                                Built and maintained websites for clients using WordPress and custom HTML/CSS/JavaScript solutions. Assisted in UI/UX design and client communications.
+                            </p>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">WordPress</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">PHP</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full">jQuery</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Get In <span class="gradient-text">Touch</span></h2>
+                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 mx-auto"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6">Let's Talk About Your Project</h3>
+                    <p class="text-gray-600 mb-8">
+                        Have a project in mind or want to discuss potential opportunities? Feel free to reach out using the contact form or through any of my social media profiles. I'm always open to new challenges and collaborations.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                                <i class="fas fa-envelope text-blue-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Email</h4>
+                                <a href="mailto:hello@example.com" class="text-gray-600 hover:text-blue-500 transition-colors">hello@example.com</a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center mr-4">
+                                <i class="fas fa-phone-alt text-emerald-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Phone</h4>
+                                <a href="tel:+1234567890" class="text-gray-600 hover:text-blue-500 transition-colors">+1 (234) 567-890</a>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center mr-4">
+                                <i class="fas fa-map-marker-alt text-purple-500"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Location</h4>
+                                <p class="text-gray-600">San Francisco, CA</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h4 class="font-bold mb-4">Follow Me</h4>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-blue-700 hover:text-white transition-all">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-800 hover:text-white transition-all">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-pink-600 hover:text-white transition-all">
+                                <i class="fab fa-dribbble"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input type="text" id="name" name="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Your name">
+                            </div>
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Your email">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                            <input type="text" id="subject" name="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Subject">
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea id="message" name="message" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="Your message"></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-emerald-500 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 gradient-text">Portfolio</h3>
+                    <p class="text-gray-400 mb-4">
+                        Creating digital experiences that are both beautiful and functional.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <i class="fab fa-dribbble"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About</a></li>
+                        <li><a href="#skills" class="text-gray-400 hover:text-white transition-colors">Skills</a></li>
+                        <li><a href="#projects" class="text-gray-400 hover:text-white transition-colors">Projects</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Newsletter</h3>
+                    <p class="text-gray-400 mb-4">
+                        Subscribe to my newsletter for the latest updates and insights.
+                    </p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-2 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 w-full">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-r-lg transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2023 Portfolio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 w-12 h-12 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300">
+        <i class="fas fa-arrow-up"></i>
+    </button>
     
     <script>
-        // Use modern JavaScript features with fallbacks
-        document.addEventListener('DOMContentLoaded', () => {
-            // Game elements
-            const canvas = document.getElementById('gameCanvas');
-            const ctx = canvas.getContext('2d', { alpha: false });
-            const startScreen = document.getElementById('startScreen');
-            const gameOverScreen = document.getElementById('gameOverScreen');
-            const scoreDisplay = document.getElementById('scoreDisplay');
-            const currentScoreDisplay = document.getElementById('currentScore');
-            const finalScoreDisplay = document.getElementById('finalScore');
-            const highScoreDisplay = document.getElementById('highScoreDisplay');
-            const finalHighScoreDisplay = document.getElementById('finalHighScore');
-            const startButton = document.getElementById('startButton');
-            const restartButton = document.getElementById('restartButton');
-            
-            // Set canvas size with device pixel ratio support
-            function resizeCanvas() {
-                const dpr = window.devicePixelRatio || 1;
-                const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
-                ctx.scale(dpr, dpr);
-            }
-            
-            // Initial resize and on window resize
-            resizeCanvas();
-            window.addEventListener('resize', () => {
-                resizeCanvas();
-                if (gameRunning) {
-                    drawBackground();
-                    drawPipes();
-                    drawBird();
-                }
-            });
-            
-            // Game variables
-            let score = 0;
-            let highScore = localStorage.getItem('cyberFlappyHighScore') || 0;
-            let gameRunning = false;
-            let animationFrameId;
-            let lastPipeTime = 0;
-            let pipeInterval = 2000; // ms between pipes
-            
-            // Update high score display
-            highScoreDisplay.textContent = highScore;
-            
-            // Bird properties (scaled based on screen size)
-            const getBirdSize = () => Math.max(30, Math.min(40, canvas.width / 10));
-            const bird = {
-                x: 100,
-                y: canvas.height / 2,
-                get width() { return getBirdSize(); },
-                get height() { return getBirdSize() * 0.75; },
-                velocity: 0,
-                gravity: 0.5,
-                jumpForce: -10,
-                color: '#0ff'
-            };
-            
-            // Pipes properties (scaled based on screen size)
-            const getPipeWidth = () => Math.max(60, Math.min(80, canvas.width / 8));
-            const getPipeGap = () => Math.max(180, Math.min(220, canvas.height / 3));
-            const pipes = {
-                get width() { return getPipeWidth(); },
-                get gap() { return getPipeGap(); },
-                speed: 3,
-                list: [],
-                color: '#f0f'
-            };
-            
-            // Background elements
-            const background = {
-                buildings: [],
-                stars: [],
-                color: '#0a0a1a'
-            };
-            
-            // Create initial background buildings
-            function createBuildings() {
-                background.buildings = [];
-                const buildingCount = Math.max(5, Math.floor(canvas.width / 150));
-                for (let i = 0; i < buildingCount; i++) {
-                    background.buildings.push({
-                        x: i * (canvas.width / buildingCount),
-                        width: canvas.width / buildingCount,
-                        height: Math.random() * 200 + 100,
-                        color: `hsl(${Math.random() * 60 + 240}, 80%, 30%)`
-                    });
-                }
-            }
-            
-            // Create stars
-            function createStars() {
-                background.stars = [];
-                const starCount = Math.max(50, Math.floor(canvas.width * canvas.height / 5000));
-                for (let i = 0; i < starCount; i++) {
-                    background.stars.push({
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height,
-                        size: Math.random() * 2 + 1,
-                        twinkle: Math.random() * 5
-                    });
-                }
-            }
-            
-            // Draw neon glow effect
-            function drawNeonGlow(x, y, width, height, color, blur = 20) {
-                ctx.save();
-                ctx.shadowColor = color;
-                ctx.shadowBlur = blur;
-                ctx.fillStyle = color;
-                ctx.fillRect(x, y, width, height);
-                ctx.restore();
-            }
-            
-            // Draw bird
-            function drawBird() {
-                // Neon glow
-                drawNeonGlow(bird.x - 5, bird.y - 5, bird.width + 10, bird.height + 10, bird.color);
-                
-                // Bird body
-                ctx.fillStyle = '#000';
-                ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
-                
-                // Bird eye
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(bird.x + bird.width - 15, bird.y + 5, 10, 10);
-                
-                // Bird beak
-                ctx.fillStyle = '#ff0';
-                ctx.beginPath();
-                ctx.moveTo(bird.x + bird.width, bird.y + bird.height / 2);
-                ctx.lineTo(bird.x + bird.width + 15, bird.y + bird.height / 2);
-                ctx.lineTo(bird.x + bird.width, bird.y + bird.height / 2 + 10);
-                ctx.closePath();
-                ctx.fill();
-            }
-            
-            // Draw pipes
-            function drawPipes() {
-                pipes.list.forEach(pipe => {
-                    // Top pipe
-                    drawNeonGlow(pipe.x - 5, 0, pipes.width + 10, pipe.topHeight + 10, pipes.color);
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(pipe.x, 0, pipes.width, pipe.topHeight);
-                    
-                    // Bottom pipe
-                    drawNeonGlow(pipe.x - 5, pipe.bottomY - 5, pipes.width + 10, pipe.bottomHeight + 10, pipes.color);
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(pipe.x, pipe.bottomY, pipes.width, pipe.bottomHeight);
-                    
-                    // Pipe decorations
-                    ctx.fillStyle = '#0ff';
-                    // Top pipe decoration
-                    ctx.fillRect(pipe.x, pipe.topHeight - 20, pipes.width, 5);
-                    // Bottom pipe decoration
-                    ctx.fillRect(pipe.x, pipe.bottomY, pipes.width, 5);
-                });
-            }
-            
-            // Draw background
-            function drawBackground() {
-                // Clear canvas
-                ctx.fillStyle = background.color;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw stars
-                ctx.fillStyle = '#fff';
-                background.stars.forEach(star => {
-                    const brightness = 0.7 + Math.sin(Date.now() / 1000 + star.twinkle) * 0.3;
-                    ctx.globalAlpha = brightness;
-                    ctx.fillRect(star.x, star.y, star.size, star.size);
-                });
-                ctx.globalAlpha = 1;
-                
-                // Draw buildings
-                background.buildings.forEach(building => {
-                    // Building glow
-                    drawNeonGlow(building.x - 5, canvas.height - building.height - 5, building.width + 10, building.height + 10, building.color, 15);
-                    
-                    // Building body
-                    ctx.fillStyle = '#000';
-                    ctx.fillRect(building.x, canvas.height - building.height, building.width, building.height);
-                    
-                    // Building windows
-                    ctx.fillStyle = '#0ff';
-                    const windowRows = Math.floor(building.height / 30);
-                    const windowCols = Math.floor(building.width / 20);
-                    const windowPadding = 5;
-                    
-                    for (let row = 0; row < windowRows; row++) {
-                        for (let col = 0; col < windowCols; col++) {
-                            if (Math.random() > 0.3) { // Randomly turn some windows on/off
-                                ctx.fillRect(
-                                    building.x + col * 20 + windowPadding,
-                                    canvas.height - building.height + row * 30 + windowPadding,
-                                    10, 10
-                                );
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Update bird position
-            function updateBird() {
-                bird.velocity += bird.gravity;
-                bird.y += bird.velocity;
-                
-                // Check if bird hits the ground or ceiling
-                if (bird.y + bird.height > canvas.height || bird.y < 0) {
-                    gameOver();
-                }
-            }
-            
-            // Make bird jump
-            function jump() {
-                if (gameRunning) {
-                    bird.velocity = bird.jumpForce;
-                    
-                    // Play jump sound (using Web Audio API for better mobile support)
-                    try {
-                        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioCtx.createOscillator();
-                        const gainNode = audioCtx.createGain();
-                        
-                        oscillator.type = 'sine';
-                        oscillator.frequency.value = 800;
-                        gainNode.gain.value = 0.1;
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioCtx.destination);
-                        
-                        oscillator.start();
-                        oscillator.stop(audioCtx.currentTime + 0.1);
-                    } catch (e) {
-                        console.log('Audio error:', e);
-                    }
-                }
-            }
-            
-            // Generate new pipes
-            function generatePipes() {
-                const minHeight = 50;
-                const maxHeight = canvas.height - pipes.gap - minHeight;
-                const topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-                
-                pipes.list.push({
-                    x: canvas.width,
-                    topHeight: topHeight,
-                    bottomY: topHeight + pipes.gap,
-                    bottomHeight: canvas.height - (topHeight + pipes.gap),
-                    passed: false
-                });
-            }
-            
-            // Update pipes
-            function updatePipes() {
-                const now = Date.now();
-                
-                // Generate new pipes based on time interval
-                if (pipes.list.length === 0 || (now - lastPipeTime > pipeInterval && pipes.list[pipes.list.length - 1].x < canvas.width - 200)) {
-                    generatePipes();
-                    lastPipeTime = now;
-                    
-                    // Increase difficulty slightly
-                    pipeInterval = Math.max(1000, pipeInterval - 10);
-                    pipes.speed = Math.min(6, pipes.speed + 0.01);
-                }
-                
-                // Move pipes and check for collisions
-                for (let i = pipes.list.length - 1; i >= 0; i--) {
-                    pipes.list[i].x -= pipes.speed;
-                    
-                    // Check for collision with bird
-                    if (
-                        bird.x + bird.width > pipes.list[i].x &&
-                        bird.x < pipes.list[i].x + pipes.width &&
-                        (bird.y < pipes.list[i].topHeight || bird.y + bird.height > pipes.list[i].bottomY)
-                    ) {
-                        gameOver();
-                    }
-                    
-                    // Check if bird passed the pipe
-                    if (!pipes.list[i].passed && bird.x > pipes.list[i].x + pipes.width) {
-                        pipes.list[i].passed = true;
-                        score++;
-                        currentScoreDisplay.textContent = score;
-                        
-                        // Play score sound
-                        try {
-                            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                            const oscillator = audioCtx.createOscillator();
-                            const gainNode = audioCtx.createGain();
-                            
-                            oscillator.type = 'square';
-                            oscillator.frequency.value = 1200;
-                            gainNode.gain.value = 0.1;
-                            
-                            oscillator.connect(gainNode);
-                            gainNode.connect(audioCtx.destination);
-                            
-                            oscillator.start();
-                            oscillator.stop(audioCtx.currentTime + 0.05);
-                        } catch (e) {
-                            console.log('Audio error:', e);
-                        }
-                    }
-                    
-                    // Remove pipes that are off screen
-                    if (pipes.list[i].x + pipes.width < 0) {
-                        pipes.list.splice(i, 1);
-                    }
-                }
-            }
-            
-            // Update background
-            function updateBackground() {
-                // Move buildings
-                background.buildings.forEach(building => {
-                    building.x -= pipes.speed / 2;
-                    if (building.x + building.width < 0) {
-                        building.x = canvas.width;
-                        building.height = Math.random() * 200 + 100;
-                        building.color = `hsl(${Math.random() * 60 + 240}, 80%, 30%)`;
-                    }
-                });
-                
-                // Twinkle stars
-                background.stars.forEach(star => {
-                    star.x -= pipes.speed / 10;
-                    if (star.x < 0) {
-                        star.x = canvas.width;
-                        star.y = Math.random() * canvas.height;
-                    }
-                });
-            }
-            
-            // Game over
-            function gameOver() {
-                if (!gameRunning) return;
-                
-                gameRunning = false;
-                cancelAnimationFrame(animationFrameId);
-                
-                // Play game over sound
-                try {
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const oscillator = audioCtx.createOscillator();
-                    const gainNode = audioCtx.createGain();
-                    
-                    oscillator.type = 'sawtooth';
-                    oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
-                    gainNode.gain.value = 0.1;
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioCtx.destination);
-                    
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.5);
-                } catch (e) {
-                    console.log('Audio error:', e);
-                }
-                
-                // Update high score
-                if (score > highScore) {
-                    highScore = score;
-                    localStorage.setItem('cyberFlappyHighScore', highScore);
-                }
-                
-                // Show game over screen
-                finalScoreDisplay.textContent = score;
-                finalHighScoreDisplay.textContent = highScore;
-                gameOverScreen.classList.remove('hidden');
-                scoreDisplay.classList.add('hidden');
-            }
-            
-            // Game loop optimized for mobile
-            function gameLoop(timestamp) {
-                if (!gameRunning) return;
-                
-                drawBackground();
-                updateBird();
-                updatePipes();
-                updateBackground();
-                drawPipes();
-                drawBird();
-                
-                animationFrameId = requestAnimationFrame(gameLoop);
-            }
-            
-            // Start game
-            function startGame() {
-                // Reset game state
-                score = 0;
-                currentScoreDisplay.textContent = score;
-                bird.y = canvas.height / 2;
-                bird.velocity = 0;
-                pipes.list = [];
-                lastPipeTime = Date.now();
-                pipeInterval = 2000;
-                pipes.speed = 3;
-                
-                // Create background
-                createBuildings();
-                createStars();
-                
-                // Show game elements
-                startScreen.classList.add('hidden');
-                gameOverScreen.classList.add('hidden');
-                scoreDisplay.classList.remove('hidden');
-                
-                // Start game
-                gameRunning = true;
-                animationFrameId = requestAnimationFrame(gameLoop);
-            }
-            
-            // Event listeners with passive options for better mobile performance
-            startButton.addEventListener('click', startGame, { passive: true });
-            restartButton.addEventListener('click', startGame, { passive: true });
-            
-            // Keyboard controls
-            document.addEventListener('keydown', (e) => {
-                if (e.code === 'Space') {
-                    e.preventDefault();
-                    jump();
-                }
-            }, { passive: false });
-            
-            // Touch controls
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                jump();
-            }, { passive: false });
-            
-            // Mouse controls
-            canvas.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                jump();
-            }, { passive: false });
-            
-            // Initial setup
-            drawBackground();
-            createBuildings();
-            createStars();
-            
-            // Handle mobile browser address bar showing/hiding
-            window.addEventListener('resize', () => {
-                if (document.activeElement) {
-                    document.activeElement.blur();
-                }
-            });
-            
-            // Prevent pull-to-refresh on mobile
-            document.body.addEventListener('touchmove', (e) => {
-                if (gameRunning) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
         });
+        
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+                
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobile-menu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+        
+        // Back to top button
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.remove('opacity-100', 'visible');
+                backToTopButton.classList.add('opacity-0', 'invisible');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Animate skill bars on scroll
+        const skillBars = document.querySelectorAll('.skill-progress');
+        
+        function animateSkillBars() {
+            skillBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0';
+                
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }
+        
+        // Intersection Observer for skill bars
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateSkillBars();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        const skillsSection = document.getElementById('skills');
+        if (skillsSection) {
+            observer.observe(skillsSection);
+        }
+        
+        // Form submission
+        const contactForm = document.querySelector('form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const subject = document.getElementById('subject').value;
+                const message = document.getElementById('message').value;
+                
+                // Here you would typically send the form data to a server
+                console.log('Form submitted:', { name, email, subject, message });
+                
+                // Show success message
+                alert('Thank you for your message! I will get back to you soon.');
+                
+                // Reset form
+                contactForm.reset();
+            });
+        }
     </script>
 </body>
 </html>
